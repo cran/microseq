@@ -36,9 +36,8 @@ A \code{Fasta} object can be treated as a \code{data.frame}, which makes it quic
 \samp{Header} and \samp{Sequence} for specific regular expressions, sort or re-arrange the ordering of the sequences,
 extract subsets or add new data to an existing \code{Fasta} object.
 
-The \code{plot.Fasta} function will display the content of the \code{Fasta} object as a bar chart over
-the lengths of the sequences. The bars are displayed horizontally, and the first sequence is on top, just like in
-the FASTA file.
+The \code{plot.Fasta} function will display the content of the \code{Fasta} object as a histogram over
+the lengths of the sequences.
 
 The \code{summary.Fasta} function will display a text giving the number of sequences and the alphabet,
 i.e. listing all unique symbols found in the file.

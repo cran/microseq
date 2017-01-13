@@ -38,7 +38,7 @@
 #' 
 amplicon <- function( dna, forward, reverse ){
   NC <- nchar( dna )
-  rvdna <- microseq::reverseComplement( dna )
+  rvdna <- reverseComplement( dna )
   fwd <- iupac2regex( forward )
   rvs <- iupac2regex( reverse )
   
@@ -67,7 +67,7 @@ amplicon <- function( dna, forward, reverse ){
       se <- se[which( se[,1]<se[,2] ),]
       if( nrow( se ) > 0 ){
         amps <- c( amps,
-                   microseq::reverseComplement( substring( rvdna[i], se[,1], se[,2] ) ) )
+                   reverseComplement( substring( rvdna[i], se[,1], se[,2] ) ) )
       }
     }
     return( amps )
@@ -75,6 +75,36 @@ amplicon <- function( dna, forward, reverse ){
   return( amplicons )
 }
 
+
+#' @name iupac2regex
+#' @title Ambiguity symbol conversion
+#' @aliases uipac2regex regex2iupac
+#' 
+#' @description Converting DNA ambiguity symbols to regular expressions, and vice versa.
+#' 
+#' @usage iupac2regex( s )
+#' regex2iupac( s )
+#' 
+#' @param s Character string containing a DNA sequence.
+#' 
+#' @details The DNA alphabet may contain ambiguity symbols, e.g. a W means either A or T.
+#' When using a regular expression search, these letters must be replaced by the proper
+#' regular expression, e.g. W is replaced by [AT] in the string. These function makes this
+#' translations
+#' 
+#' @return A string where the ambiguity symbol has been replaced by a regular expression
+#' (\code{iupac2regex}) or a regular expression has been replaced by an ambiguity symbol
+#' (\code{regex2iupac}).
+#' 
+#' @author Lars Snipen.
+#' 
+#' @examples
+#' iupac2regex( "ACWGT" )
+#' regex2iupac( "AC[AG]GT" )
+#' 
+#' @export iupac2regex
+#' @export regex2iupac
+#' 
 iupac2regex <- function( s ){
   IUPAC <- matrix( c( "W","[AT]",
                       "S","[CG]",
@@ -93,7 +123,6 @@ iupac2regex <- function( s ){
   }
   return( s )
 }
-
 regex2iupac <- function( s ){
   IUPAC <- matrix( c( "W","[AT]",
                       "S","[CG]",

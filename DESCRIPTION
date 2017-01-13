@@ -1,16 +1,17 @@
 Package: microseq
 Type: Package
 Title: Basic Biological Sequence Analysis
-Version: 1.0
-Date: 2016-07-26
+Version: 1.2
+Date: 2017-01-13
 Author: Lars Snipen, Kristian Hovde Liland
 Maintainer: Lars Snipen <lars.snipen@nmbu.no>
-Description: Basic functions for microbial sequence data analysis. In some cases the functions use the corresponding functions in the 'Biostrings' package from Bioconductor <http://www.bioconductor.org/>, but provide an easier interface. 
+Description: Basic functions for microbial sequence data analysis.
 License: GPL-2
+Depends: R (>= 3.3.1)
+Imports: Rcpp (>= 0.11.1)
+LinkingTo: Rcpp (>= 0.11.1)
 RoxygenNote: 5.0.1
-Depends: R (>= 3.2.1)
-Imports: Biostrings
-NeedsCompilation: no
-Packaged: 2016-07-26 07:33:56 UTC; larssn
+NeedsCompilation: yes
+Packaged: 2017-01-13 11:28:56 UTC; larssn
 Repository: CRAN
-Date/Publication: 2016-07-27 03:49:42
+Date/Publication: 2017-01-13 15:40:55

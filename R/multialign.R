@@ -64,7 +64,7 @@ msalign <- function( fdata, machine="muscle" ){
 #' @details The software MUSCLE (Edgar, 2004) must be installed and available on the system. Test this by typing
 #' \code{system("muscle")} in the Console, and some sensible output should be produced. NOTE: The executable must
 #' be named \code{muscle} on your system, no version numbers etc. For more details
-#' on MUSCLE, see http://www.drive5.com/muscle.
+#' on MUSCLE, see \url{http://www.drive5.com/muscle}.
 #' 
 #' By default \code{diags=FALSE} but can be set to \code{TRUE} to increase speed. This should be done only 
 #' if sequences are highly similar.
@@ -125,7 +125,7 @@ muscle <- function( in.file, out.file, quiet=FALSE, diags=FALSE, maxiters=16 ){
 #' are typically available for a number of RNA-families, see below. 
 #' 
 #' The argument \code{CM.file} is the name of a file with a valid correlation model, e.g. one downloaded
-#' from the Rfam database (http://rfam.xfam.org/). See examples below for the 16S model supplied with this
+#' from the \href{http://rfam.xfam.org/}{Rfam database}. See examples below for the 16S model supplied with this
 #' package.
 #' 
 #' @return The result is written to the file specified in \code{out.file}.

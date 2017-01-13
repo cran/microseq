@@ -18,19 +18,28 @@
 #' fdta <- readFasta(ex.file)
 #' translate(fdta$Sequence)
 #' 
-#' @importFrom Biostrings DNAStringSet translate
 #' 
 #' @export
 #' 
+#' @export
 translate <- function( nuc.sequences, M.start=TRUE ){
   nuc.sequences <- gsub( "U", "T", toupper( nuc.sequences ) )
   if( M.start ){
     nuc.sequences <- gsub( "^GTG|^TTG", "ATG", nuc.sequences )
   }
-  xss <- DNAStringSet( nuc.sequences, use.names=F )
-  aass <- Biostrings::translate( xss, if.fuzzy.codon="solve" )
-  return( as.character( aass ) )
+  return( transl( nuc.sequences ) )
 }
+
+# translate <- function( nuc.sequences, M.start=TRUE ){
+#   nuc.sequences <- gsub( "U", "T", toupper( nuc.sequences ) )
+#   if( M.start ){
+#     nuc.sequences <- gsub( "^GTG|^TTG", "ATG", nuc.sequences )
+#   }
+#   xss <- DNAStringSet( nuc.sequences, use.names=F )
+#   aass <- Biostrings::translate( xss, if.fuzzy.codon="solve" )
+#   return( as.character( aass ) )
+# }
+# 
 
 
 #' @name reverseComplement
@@ -39,6 +48,7 @@ translate <- function( nuc.sequences, M.start=TRUE ){
 #' @description The standard reverse-complement of nucleotide sequences.
 #' 
 #' @param nuc.sequences Character vector containing the nucleotide sequences.
+#' @param reverse Logical indicating if complement should be reversed.
 #' 
 #' @details This function uses the Biostrings::reverseComplement function.
 #' 
@@ -51,13 +61,15 @@ translate <- function( nuc.sequences, M.start=TRUE ){
 #' fdta <- readFasta(ex.file)
 #' reverseComplement(fdta$Sequence)
 #' 
-#' @importFrom Biostrings DNAStringSet reverseComplement
 #' 
 #' @export
 #' 
-reverseComplement <- function( nuc.sequences ){
-  nuc.sequences <- gsub( "U", "T", toupper( nuc.sequences ) )
-  xss <- DNAStringSet( nuc.sequences, use.names=F )
-  rcxss <- Biostrings::reverseComplement( xss )
-  return( as.character( rcxss ) )
+reverseComplement <- function( nuc.sequences, reverse = TRUE ){
+  return(revComp(nuc.sequences, reverse))
 }
+# reverseComplement <- function( nuc.sequences ){
+#   nuc.sequences <- gsub( "U", "T", toupper( nuc.sequences ) )
+#   xss <- DNAStringSet( nuc.sequences, use.names=F )
+#   rcxss <- Biostrings::reverseComplement( xss )
+#   return( as.character( rcxss ) )
+# }

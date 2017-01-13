@@ -4,10 +4,12 @@
 \alias{reverseComplement}
 \title{Reverse-complementation of DNA}
 \usage{
-reverseComplement(nuc.sequences)
+reverseComplement(nuc.sequences, reverse = TRUE)
 }
 \arguments{
 \item{nuc.sequences}{Character vector containing the nucleotide sequences.}
+
+\item{reverse}{Logical indicating if complement should be reversed.}
 }
 \value{
 A character vector of reverse-complemented sequences.
@@ -22,6 +24,7 @@ This function uses the Biostrings::reverseComplement function.
 ex.file <- file.path(file.path(path.package("microseq"),"extdata"),"small.fasta")
 fdta <- readFasta(ex.file)
 reverseComplement(fdta$Sequence)
+
 
 }
 \author{

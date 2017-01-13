@@ -35,7 +35,7 @@ only use this function to align sequences for which you have such correlation mo
 are typically available for a number of RNA-families, see below. 
 
 The argument \code{CM.file} is the name of a file with a valid correlation model, e.g. one downloaded
-from the Rfam database (http://rfam.xfam.org/). See examples below for the 16S model supplied with this
+from the \href{http://rfam.xfam.org/}{Rfam database}. See examples below for the 16S model supplied with this
 package.
 }
 \examples{
