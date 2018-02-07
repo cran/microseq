@@ -34,11 +34,15 @@
 #' 
 #' @seealso \code{\link{plot.Fasta}}, \code{\link{summary.Fasta}}, \code{\link{readFastq}}.
 #' 
-#' @examples 
+#' @examples
+#' \dontrun{
+#' # We need a FASTA-file to read, here is one example file:
 #' ex.file <- file.path(file.path(path.package("microseq"),"extdata"),"small.fasta")
+#' # Reading a file with name in ex.file
 #' fdta <- readFasta(ex.file)
 #' summary(fdta)
 #' plot(fdta)
+#' }
 #' 
 #' @keywords sequence FASTA Fasta
 #' 
@@ -47,16 +51,21 @@
 #' @export writeFasta
 #' 
 readFasta <- function( in.file ){
-  fdta <- data.frame(read_fasta(in.file), stringsAsFactors = FALSE)
-  class( fdta ) <- c( "Fasta", "data.frame" )
-  return( fdta )
+  if( file.exists( in.file ) ){
+    in.file <- normalizePath( in.file )
+    fdta <- data.frame( read_fasta( in.file ), stringsAsFactors = FALSE )
+    class( fdta ) <- c( "Fasta", "data.frame" )
+    return( fdta )
+  } else {
+    stop( "Cannot find ", in.file, ", please correct path and/or file name" )
+  }
 }
 writeFasta <- function( fdta, out.file, width=80 ){
   cn <- colnames( fdta )
   if( !("Header" %in% cn) | !("Sequence" %in% cn) ){
     stop( "This is not a Fasta object, Header or Sequence is lacking\n" )
   }
-  status <- write_fasta(fdta$Header, fdta$Sequence, out.file, width)
+  status <- write_fasta( fdta$Header, fdta$Sequence, out.file, width )
   invisible( status )
 }
 

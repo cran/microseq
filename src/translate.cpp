@@ -82,7 +82,7 @@ CharacterVector transl(CharacterVector Seq) {
                   aa[i].replace(j,1,"-");
                 }
               }
-            } else { // T
+            } else { // c2 == T
               if(c3 == "T" || c3 == "C" || c3 == "A" || c3 == "Y" || c3 == "M" || c3 == "W" || c3 == "H"){
                 aa[i].replace(j,1,"I");
               } else {
@@ -137,11 +137,11 @@ CharacterVector transl(CharacterVector Seq) {
                 if(c2 == "G"){
                   aa[i].replace(j,1,"G");
                 } else { // T
-                  aa[i].replace(j,1,"T");
+                  aa[i].replace(j,1,"V");
                 }
               }
             }
-          } else { // T
+          } else { // c1 == T
             if(c2 == "A"){
               if(c3 == "T" || c3 == "C" || c3 == "Y"){
                 aa[i].replace(j,1,"Y");
@@ -164,13 +164,13 @@ CharacterVector transl(CharacterVector Seq) {
                       aa[i].replace(j,1,"*");
                     } else {
                       if(c3 == "G"){
-                        aa[i].replace(j,1,"G");
+                        aa[i].replace(j,1,"W");
                       } else {
                         aa[i].replace(j,1,"-");
                       }
                     }
                   }
-                } else { // T
+                } else { // c2 == T
                   if(c3 == "T" || c3 == "C" || c3 == "Y"){
                     aa[i].replace(j,1,"F");
                   } else {

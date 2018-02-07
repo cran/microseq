@@ -18,9 +18,6 @@
 #' fdta <- readFasta(ex.file)
 #' translate(fdta$Sequence)
 #' 
-#' 
-#' @export
-#' 
 #' @export
 translate <- function( nuc.sequences, M.start=TRUE ){
   nuc.sequences <- gsub( "U", "T", toupper( nuc.sequences ) )
@@ -29,17 +26,6 @@ translate <- function( nuc.sequences, M.start=TRUE ){
   }
   return( transl( nuc.sequences ) )
 }
-
-# translate <- function( nuc.sequences, M.start=TRUE ){
-#   nuc.sequences <- gsub( "U", "T", toupper( nuc.sequences ) )
-#   if( M.start ){
-#     nuc.sequences <- gsub( "^GTG|^TTG", "ATG", nuc.sequences )
-#   }
-#   xss <- DNAStringSet( nuc.sequences, use.names=F )
-#   aass <- Biostrings::translate( xss, if.fuzzy.codon="solve" )
-#   return( as.character( aass ) )
-# }
-# 
 
 
 #' @name reverseComplement
@@ -63,13 +49,75 @@ translate <- function( nuc.sequences, M.start=TRUE ){
 #' 
 #' 
 #' @export
-#' 
 reverseComplement <- function( nuc.sequences, reverse = TRUE ){
   return(revComp(nuc.sequences, reverse))
 }
-# reverseComplement <- function( nuc.sequences ){
-#   nuc.sequences <- gsub( "U", "T", toupper( nuc.sequences ) )
-#   xss <- DNAStringSet( nuc.sequences, use.names=F )
-#   rcxss <- Biostrings::reverseComplement( xss )
-#   return( as.character( rcxss ) )
-# }
+
+
+
+#' @name iupac2regex
+#' @title Ambiguity symbol conversion
+#' @aliases uipac2regex regex2iupac
+#' 
+#' @description Converting DNA ambiguity symbols to regular expressions, and vice versa.
+#' 
+#' @usage iupac2regex( sequence )
+#' regex2iupac( sequence )
+#' 
+#' @param sequence Character string containing a DNA sequence.
+#' 
+#' @details The DNA alphabet may contain ambiguity symbols, e.g. a W means either A or T.
+#' When using a regular expression search, these letters must be replaced by the proper
+#' regular expression, e.g. W is replaced by [AT] in the string. The \code{iupac2regex} makes this
+#' translation, while \code{regex2iupac} cobverts the other way again (replace [AT] with W).
+#' 
+#' @return A string where the ambiguity symbol has been replaced by a regular expression
+#' (\code{iupac2regex}) or a regular expression has been replaced by an ambiguity symbol
+#' (\code{regex2iupac}).
+#' 
+#' @author Lars Snipen.
+#' 
+#' @examples
+#' iupac2regex( "ACWGT" )
+#' regex2iupac( "AC[AG]GT" )
+#' 
+#' @export iupac2regex
+#' @export regex2iupac
+#' 
+iupac2regex <- function( sequence ){
+  IUPAC <- matrix( c( "W","[AT]",
+                      "S","[CG]",
+                      "M","[AC]",
+                      "K","[GT]",
+                      "R","[AG]",
+                      "Y","[CT]",
+                      "B","[CGT]",
+                      "D","[AGT]",
+                      "H","[ACT]",
+                      "V","[ACG]",
+                      "N","[ACGT]" ), ncol=2, byrow=T )
+  s <- gsub( "X", "N", toupper( sequence ) )
+  for( i in 1:nrow(IUPAC) ){
+    s <- gsub( IUPAC[i,1], IUPAC[i,2], s, fixed=T )
+  }
+  return( s )
+}
+regex2iupac <- function( sequence ){
+  IUPAC <- matrix( c( "W","[AT]",
+                      "S","[CG]",
+                      "M","[AC]",
+                      "K","[GT]",
+                      "R","[AG]",
+                      "Y","[CT]",
+                      "B","[CGT]",
+                      "D","[AGT]",
+                      "H","[ACT]",
+                      "V","[ACG]",
+                      "N","[ACGT]" ), ncol=2, byrow=T )
+  s <- toupper( sequence )
+  for( i in 1:nrow(IUPAC) ){
+    s <- gsub( IUPAC[i,2], IUPAC[i,1], s, fixed=T )
+  }
+  return( s )
+}
+

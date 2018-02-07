@@ -92,12 +92,13 @@ msalign <- function( fdata, machine="muscle" ){
 #' @export muscle
 #' 
 muscle <- function( in.file, out.file, quiet=FALSE, diags=FALSE, maxiters=16 ){
-  available.external('muscle')
-  dtxt <- ifelse( diags, "-diags", "" )
-  itxt <- paste( "-maxiters", maxiters )
-  qt <- ifelse( quiet, "-quiet", "" )
-  cmd <- paste( "muscle", dtxt, itxt, qt, "-in", in.file, "-out", out.file )
-  system( cmd )
+  if( available.external( "muscle" ) ){
+    dtxt <- ifelse( diags, "-diags", "" )
+    itxt <- paste( "-maxiters", maxiters )
+    qt <- ifelse( quiet, "-quiet", "" )
+    cmd <- paste( "muscle", dtxt, itxt, qt, "-in", in.file, "-out", out.file )
+    system( cmd )
+  }
 }
 
 
@@ -148,14 +149,34 @@ muscle <- function( in.file, out.file, quiet=FALSE, diags=FALSE, maxiters=16 ){
 #' @export cmalign
 #' 
 cmalign <- function( in.file, out.file, CM.file, threads=1 ){
-  available.external('infernal')
-  cmd <- paste( "cmalign --cpu ", threads,
-                " -o ", out.file,
-                " --outformat AFA",
-                " ", CM.file,
-                " ", in.file,
-                sep="" )
-  system( cmd )
+  if( available.external('infernal') ){
+    cmd <- paste( "cmalign --cpu ", threads,
+                  " -o cmalign.stk",
+                  " --outformat Pfam",
+                  " ", CM.file,
+                  " ", in.file,
+                  sep="" )
+    system( cmd )
+    lines <- readLines( "cmalign.stk" )
+    fdta <- stk2fasta( lines )
+    writeFasta( fdta, out.file )
+    file.remove( "cmalign.stk" )
+  }
+}
+
+stk2fasta <- function( lines ){
+  lines <- lines[nchar(lines)>0]
+  lines <- lines[lines != "//"]
+  lines <- lines[grep( "^#", lines, invert=T )]
+  lst <- strsplit( lines, split=" " )
+  header <- sapply( lst, function(x){x[1]} )
+  sequence <- toupper( sapply( lst, function(x){x[length(x)]} ) )
+  
+  fdta <- data.frame( Header=header,
+                      Sequence=gsub( "U", "T", gsub( "\\.", "-", sequence ) ),
+                      stringsAsFactors=F )
+  class( fdta ) <- c( "Fasta", "data.frame" )
+  return( fdta )
 }
 
 
@@ -240,7 +261,7 @@ available.external <- function(what){
   
   if(what == "infernal"){
     chr <- NULL
-    try(chr <- system('cmalign -version', intern = TRUE), silent = TRUE)
+    try(chr <- system('cmalign -h', intern = TRUE), silent = TRUE)
     if(is.null(chr)){
       stop(paste('Infernal was not found by R.',
                     'Please install Infernal from: http://eddylab.org/infernal/.',

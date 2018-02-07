@@ -26,9 +26,7 @@ ex.file <- file.path(file.path(path.package("microseq"),"extdata"),"small.fasta"
 fdta <- readFasta(ex.file)
 translate(fdta$Sequence)
 
-
 }
 \author{
 Lars Snipen and Kristian Hovde Liland.
 }
-

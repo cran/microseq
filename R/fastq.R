@@ -48,23 +48,27 @@
 #' 
 #' @keywords sequence FASTQ Fastq
 #' 
-#' @useDynLib microseq
+#' @useDynLib microseq, .registration = TRUE
 #' @importFrom Rcpp evalCpp
 #' 
 #' @export readFastq
 #' @export writeFastq
 #' 
 readFastq <- function( in.file, Sanger = FALSE ){
-  if(Sanger){
-    fq <- read_fastq_Sanger( in.file )
+  if( file.exists( in.file ) ){
+    in.file <- normalizePath( in.file )
+    if(Sanger){
+      fq <- read_fastq_Sanger( in.file )
+    } else {
+      fq <- read_fastq( in.file )
+    }
+    fq <- as.data.frame( fq, stringsAsFactors = FALSE )
+    class( fq ) <- c( "Fastq", "data.frame" )
+    return( fq )
   } else {
-    fq <- read_fastq( in.file )
+    stop( "Cannot find ", in.file, ", please correct path and/or file name" )
   }
-  fq <- as.data.frame( fq, stringsAsFactors = FALSE)
-  class( fq ) <- c( "Fastq", "data.frame" )
-  return( fq )
 }
-
 writeFastq <- function( fdta, out.file ){
   cn <- colnames( fdta )
   if( !("Header" %in% cn) || !("Sequence" %in% cn) || !("Quality" %in% cn) ){
