@@ -32,7 +32,8 @@ set too low you risk that all columns are discarded!
 }
 \examples{
 \dontrun{
-msa.file <- file.path(file.path(path.package("microseq"),"extdata"),"msa.fasta")
+xpth <- file.path(path.package("microseq"),"extdata")
+msa.file <- file.path(xpth, "msa.fasta")
 msa <- readFasta(msa.file)
 print(nchar(msa$Sequence))
 msa.trimmed <- msaTrim(msa)
@@ -41,7 +42,7 @@ print(nchar(msa.trimmed$Sequence))
 
 }
 \seealso{
-\code{\link{muscle}}, \code{\link{cmalign}}.
+\code{\link{muscle}}.
 }
 \author{
 Lars Snipen.

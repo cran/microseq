@@ -45,6 +45,6 @@ gregexpr <- function(pattern, text, ignore.case = FALSE, perl = FALSE, fixed = F
   lst <- base::gregexpr(pattern, text, ignore.case, perl, fixed, useBytes)
   if(extract){
     lst <- lapply(1:length(lst), function(i){substring(text[i], lst[[i]], lst[[i]]+attr(lst[[i]], "match.length") - 1)})
-  }
+    }
   return(lst)
 }
