@@ -4,8 +4,15 @@
 \alias{gregexpr}
 \title{Extended \code{\link{gregexpr}} with substring retrieval}
 \usage{
-gregexpr(pattern, text, ignore.case = FALSE, perl = FALSE,
-  fixed = FALSE, useBytes = FALSE, extract = FALSE)
+gregexpr(
+  pattern,
+  text,
+  ignore.case = FALSE,
+  perl = FALSE,
+  fixed = FALSE,
+  useBytes = FALSE,
+  extract = FALSE
+)
 }
 \arguments{
 \item{pattern}{Character string containing a \link{regular expression} (or character string for 
@@ -25,13 +32,13 @@ case is ignored during matching.}
 all conflicting arguments.}
 
 \item{useBytes}{Logical. If \code{TRUE} the matching is done byte-by-byte rather than character-by-character.
-See \code{base::gregexpr} for details.}
+See \code{\link[base]{grep}} for details.}
 
 \item{extract}{Logical indicating if matching substrings should be extracted and returned.}
 }
 \value{
-It will either return what the \code{base::gregexpr} would (\code{extract=FALSE}) or a \samp{list}
-of substrings matching the pattern (\code{extract=TRUE}). There is one \samp{list} element for each string in
+It will either return what the \code{base::gregexpr} would (\code{extract = FALSE}) or a \samp{list}
+of substrings matching the pattern (\code{extract = TRUE}). There is one \samp{list} element for each string in
 \samp{text}, and each list element contains a character vector of all matching substrings in the corresponding
 entry of \samp{text}.
 }
@@ -51,9 +58,8 @@ gregexpr("ATG", sequences, extract = TRUE)
 
 }
 \seealso{
-\code{\link[base]{gregexpr}}
+\code{\link[base]{grep}}
 }
 \author{
 Lars Snipen and Kristian Liland.
 }
-\keyword{gregexpr}

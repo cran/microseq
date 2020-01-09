@@ -7,14 +7,14 @@
 findrRNA(genome.file, bacteria = TRUE, cpu = 1)
 }
 \arguments{
-\item{genome.file}{A fasta-formatted file with the genome sequence(s).}
+\item{genome.file}{A FASTA file with the genome sequence(s).}
 
 \item{bacteria}{Logical, the genome is either a bacteria (default) or an archea.}
 
 \item{cpu}{Number of CPUs to use, default is 1.}
 }
 \value{
-A \code{gff.table} (see \code{\link{readGFF}} for details) with one row for each detected
+A GFF-table (see \code{\link{readGFF}} for details) with one row for each detected
 rRNA sequence.
 }
 \description{
@@ -32,8 +32,7 @@ The barrnap software must be installed on the system for this function to work, 
 \dontrun{
 # This example requires the external barrnap software
 # Using a genome file in this package.
-xpth <- file.path(path.package("microseq"),"extdata")
-genome.file <- file.path(xpth,"small_genome.fasta")
+genome.file <- file.path(path.package("microseq"),"extdata","small.fna")
 
 # Searching for rRNA sequences, and inspecting
 gff.tbl <- findrRNA(genome.file)

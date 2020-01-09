@@ -2,30 +2,32 @@
 % Please edit documentation in R/orfs.R
 \name{orfLength}
 \alias{orfLength}
-\title{ORF lengths}
+\title{Length of ORF}
 \usage{
-orfLength(gff.table)
+orfLength(orf.tbl, aa = FALSE)
 }
 \arguments{
-\item{gff.table}{A \code{gff.table} (\code{data.frame}) with genomic features information.}
+\item{orf.tbl}{A \code{tibble} with the nine columns of the GFF-format (see \code{\link{findOrfs}}).}
+
+\item{aa}{Logical, length in amino acids instead of bases.}
 }
 \value{
-A vector of ORF lengths, measured as the number of codons.
+A vector of integers.
 }
 \description{
-Computes the lengths, in codons, of all ORFs in a \code{gff.table}.
+Computing the lengths of all ORFs in an \code{orf.table}.
 }
 \details{
-Note that the length returned is the number of codons in the ORF, not the number of bases. The number
-of bases should be 3 times the length. The number of amino acids should be the length minus 1 (stop codon) if the ORF is 
-not truncated. See \code{\link{findOrfs}} for more on \code{gff.table}s.
+Computes the length of an ORF in bases, including the stop codon. However, if
+\code{aa = TRUE}, then the length is in amino acids after translation. This aa-length is the
+base-length divided by 3 and minus 1, unless the ORF is truncated and lacks a stop codon.
 }
 \examples{
 # See the example in the Help-file for findOrfs.
 
 }
 \seealso{
-\code{\link{findOrfs}}, \code{\link{lorfs}}.
+\code{\link{findOrfs}}.
 }
 \author{
 Lars Snipen and Kristian Hovde Liland.

@@ -4,18 +4,18 @@
 \alias{findOrfs}
 \title{Finding ORFs in genomes}
 \usage{
-findOrfs(genome, circular = F, trans.tab = 1)
+findOrfs(genome, circular = F, trans.tab = 11)
 }
 \arguments{
-\item{genome}{A \code{\link{Fasta}} object with the genome sequence(s).}
+\item{genome}{A fasta object (\code{tibble}) with the genome sequence(s).}
 
 \item{circular}{Logical indicating if the genome sequences are completed, circular sequences.}
 
-\item{trans.tab}{Translation table}
+\item{trans.tab}{Translation table.}
 }
 \value{
-This function returns a \code{gff.table}, which is simply a \code{data.frame} with columns
-adhering to the format specified by the GFF3 format, see \code{\link{readGFF}}. If you want to retrieve
+This function returns an \code{orf.table}, which is simply a \code{\link{tibble}} with columns
+adhering to the GFF3 format specifications (a \code{gff.table}), see \code{\link{readGFF}}. If you want to retrieve
 the ORF sequences, use \code{\link{gff2fasta}}.
 }
 \description{
@@ -24,10 +24,11 @@ Finds all ORFs in prokaryotic genome sequences.
 \details{
 A prokaryotic Open Reading Frame (ORF) is defined as a subsequence starting with a  start-codon
 (ATG, GTG or TTG), followed by an integer number of triplets (codons), and ending with a stop-codon (TAA,
-TGA or TAG, unless \code{trans.tab} is not 1, see below). This function will locate all ORFs in a genome.
+TGA or TAG, unless \code{trans.tab = 4}, see below). This function will locate all such ORFs in a genome.
 
-The argument \code{genome} will typically have several sequences (chromosomes/plasmids/scaffolds/contigs).
-It is vital that the \emph{first token} (characters before first space) of every \code{genome$Header} is
+The argument \code{genome} is a fasta object, i.e. a table with columns \samp{Header} and \samp{Sequence},
+and will typically have several sequences (chromosomes/plasmids/scaffolds/contigs).
+It is vital that the \emph{first token} (characters before first space) of every \samp{Header} is
 unique, since this will be used to identify these genome sequences in the output.
 
 An alternative translation table may be specified, and as of now the only alternative implemented is table 4.
@@ -41,28 +42,28 @@ with \code{\link{lorfs}}.
 
 By default the genome sequences are assumed to be linear, i.e. contigs or other incomplete fragments
 of a genome. In such cases there will usually be some truncated ORFs at each end, i.e. ORFs where either
-the start- or the stop-codon is lacking. In the \code{gff.table} returned by this function this is marked in the
-Attributes column. The texts "Truncated=10" or "Truncated=01" indicates truncated at 
-the Start or End, respectively. If the supplied \code{genome} is a completed genome, with 
-circular chromosome/plasmids, set the flag \code{circular=TRUE} and no truncated ORFs will be listed.
-In cases where an ORF runs across the origin of a circular genome sequences, the Stop coordinate will be
+the start- or the stop-codon is lacking. In the \code{orf.table} returned by this function this is marked in the
+\samp{Attributes} column. The texts "Truncated=10" or "Truncated=01" indicates truncated at 
+the beginning or end of the genomic sequence, respectively. If the supplied \code{genome} is a completed genome, with 
+circular chromosome/plasmids, set the flag \code{circular = TRUE} and no truncated ORFs will be listed.
+In cases where an ORF runs across the origin of a circular genome sequences, the stop coordinate will be
 larger than the length of the genome sequence. This is in line with the specifications of the GFF3 format, where 
-a Start cannot be larger than the corresponding End.
+a \samp{Start} cannot be larger than the corresponding \samp{End}.
 }
 \examples{
 # Using a genome file in this package
-xpth <- file.path(path.package("microseq"),"extdata")
-genome.file <- file.path(xpth,"small_genome.fasta")
+genome.file <- file.path(path.package("microseq"),"extdata","small.fna")
 
 # Reading genome and finding orfs
 genome <- readFasta(genome.file)
 orf.tbl <- findOrfs(genome)
 
-# Computing ORF-lengths
-orf.lengths <- orfLength(orf.tbl)
-
-# Filtering to retrieve the LORFs only
-lorf.table <- lorfs(orf.tbl)
+# Pipeline for finding LORFs of minimum length 100 amino acids
+# and collecting their sequences from the genome
+findOrfs(genome) \%>\% 
+ lorfs() \%>\% 
+ filter(orfLength(., aa = TRUE) > 100) \%>\% 
+ gff2fasta(genome) -> lorf.tbl
 
 }
 \seealso{

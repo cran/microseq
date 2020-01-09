@@ -4,11 +4,18 @@
 \alias{findGenes}
 \title{Finding coding genes}
 \usage{
-findGenes(genome.file, faa.file = "", ffn.file = "", proc = "single",
-  trans.tab = 11, mask.N = FALSE, bypass.SD = FALSE)
+findGenes(
+  genome.file,
+  faa.file = "",
+  ffn.file = "",
+  proc = "single",
+  trans.tab = 11,
+  mask.N = FALSE,
+  bypass.SD = FALSE
+)
 }
 \arguments{
-\item{genome.file}{A fasta-formatted file with the genome sequence(s).}
+\item{genome.file}{A FASTA file with the genome sequence(s).}
 
 \item{faa.file}{If provided, prodigal will output all proteins to this fasta-file (text).}
 
@@ -33,7 +40,7 @@ Finding coding genes in genomic DNA using the Prodigal software.
 The external software Prodigal is used to scan through a prokaryotic genome to detect the protein
 coding genes. This free software can be installed from https://github.com/hyattpd/Prodigal.
 
-In addition to the standard output from this function, fasta-files with protein and/or DNA sequences may
+In addition to the standard output from this function, FASTA files with protein and/or DNA sequences may
 be produced directly by providing filenames in \code{faa.file} and \code{ffn.file}.
 
 The input \code{proc} allows you to specify if the input data should be treated as a single genome
@@ -52,15 +59,14 @@ The prodigal software must be installed on the system for this function to work,
 \dontrun{
 # This example requires the external prodigal software
 # Using a genome file in this package.
-xpth <- file.path(path.package("microseq"),"extdata")
-genome.file <- file.path(xpth,"small_genome.fasta")
+genome.file <- file.path(path.package("microseq"),"extdata","small.fna")
 
-# Searching for coding sequences, and inspecting
-gff.tbl <- findGenes(genome.file)
+# Searching for coding sequences, this is Mycoplasma (trans.tab = 4)
+gff.tbl <- findGenes(genome.file, trans.tab = 4)
 
 # Retrieving the sequences
 genome <- readFasta(genome.file)
-cds <- gff2fasta(gff.tbl, genome)
+cds.tbl <- gff2fasta(gff.tbl, genome)
 }
 
 }

@@ -16,7 +16,7 @@
 #' @param fixed Logical. If \code{TRUE}, \samp{pattern} is a string to be matched as is. Overrides 
 #' all conflicting arguments.
 #' @param useBytes Logical. If \code{TRUE} the matching is done byte-by-byte rather than character-by-character.
-#' See \code{base::gregexpr} for details.
+#' See \code{\link[base]{grep}} for details.
 #' @param extract Logical indicating if matching substrings should be extracted and returned.
 #' 
 #' @details Extended version of \code{base:gregexpr} that enables the return of the substrings matching
@@ -24,20 +24,18 @@
 #' behaviour is identical to \code{base::gregexpr}, but setting \code{extract=TRUE} means the matching substrings
 #' are returned.
 #' 
-#' @return It will either return what the \code{base::gregexpr} would (\code{extract=FALSE}) or a \samp{list}
-#' of substrings matching the pattern (\code{extract=TRUE}). There is one \samp{list} element for each string in
+#' @return It will either return what the \code{base::gregexpr} would (\code{extract = FALSE}) or a \samp{list}
+#' of substrings matching the pattern (\code{extract = TRUE}). There is one \samp{list} element for each string in
 #' \samp{text}, and each list element contains a character vector of all matching substrings in the corresponding
 #' entry of \samp{text}.
 #' 
 #' @author Lars Snipen and Kristian Liland.
 #' 
-#' @seealso \code{\link[base]{gregexpr}}
+#' @seealso \code{\link[base]{grep}}
 #' 
 #' @examples
 #' sequences <- c("ACATGTCATGTCC", "CTTGTATGCTG")
 #' gregexpr("ATG", sequences, extract = TRUE)
-#' 
-#' @keywords gregexpr
 #' 
 #' @export gregexpr
 #' 

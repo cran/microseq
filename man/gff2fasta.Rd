@@ -7,12 +7,12 @@
 gff2fasta(gff.table, genome)
 }
 \arguments{
-\item{gff.table}{A \code{gff.table} (\code{data.frame}) with genomic features information.}
+\item{gff.table}{A \code{gff.table} (\code{tibble}) with genomic features information.}
 
-\item{genome}{A \code{\link{Fasta}} object with the genome sequence(s).}
+\item{genome}{A fasta object (\code{tibble}) with the genome sequence(s).}
 }
 \value{
-A \code{\link{Fasta}} object with one row for each row in \code{gff.table}. 
+A fasta object with one row for each row in \code{gff.table}. 
 The \code{Header} for each sequence is a summary of the information in the
 corresponding row of \code{gff.table}.
 }
@@ -21,24 +21,26 @@ Retrieving from a genome the sequences specified in a \code{gff.table}.
 }
 \details{
 Each row in \code{gff.table} (see \code{\link{readGFF}}) describes a genomic feature
-in the \code{genome}. The information in the columns Seqid, Start, End and Strand are used to retrieve
-the sequences from \code{genome$Sequence}. Every Seqid in the \code{gff.table}
-must match the first token in one of the \code{genome$Header} texts.
+in the \code{genome}, which is a \code{\link{tibble}} with columns \samp{Header} and
+\samp{Sequence}. The information in the columns Seqid, Start, End and Strand are used to
+retrieve the sequences from the \samp{Sequence} column of \code{genome}. Every Seqid in
+the \code{gff.table} must match the first token in one of the \samp{Header} texts, in
+order to retrieve from the correct \samp{Sequence}.
 }
 \examples{
 # Using two files in this package
-xpth <- file.path(path.package("microseq"),"extdata")
-gff.file <- file.path(xpth,"small.gff")
-genome.file <- file.path(xpth,"small_genome.fasta")
+gff.file <- file.path(path.package("microseq"),"extdata","small.gff")
+genome.file <- file.path(path.package("microseq"),"extdata","small.fna")
 
-# Reading
-gff.table <- readGFF(gff.file)
+# Reading the genome first
 genome <- readFasta(genome.file)
 
 # Retrieving sequences
-fasta.obj <- gff2fasta(gff.table,genome)
-summary(fasta.obj)
-plot(fasta.obj)
+gff.table <- readGFF(gff.file)
+fa.tbl <- gff2fasta(gff.table, genome)
+
+# Alternative, using piping
+readGFF(gff.file) \%>\% gff2fasta(genome) -> fa.tbl
 
 }
 \seealso{

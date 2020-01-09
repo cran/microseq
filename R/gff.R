@@ -3,15 +3,17 @@
 #' 
 #' @description Retrieving from a genome the sequences specified in a \code{gff.table}.
 #' 
-#' @param gff.table A \code{gff.table} (\code{data.frame}) with genomic features information.
-#' @param genome A \code{\link{Fasta}} object with the genome sequence(s).
+#' @param gff.table A \code{gff.table} (\code{tibble}) with genomic features information.
+#' @param genome A fasta object (\code{tibble}) with the genome sequence(s).
 #' 
 #' @details Each row in \code{gff.table} (see \code{\link{readGFF}}) describes a genomic feature
-#' in the \code{genome}. The information in the columns Seqid, Start, End and Strand are used to retrieve
-#' the sequences from \code{genome$Sequence}. Every Seqid in the \code{gff.table}
-#' must match the first token in one of the \code{genome$Header} texts.
+#' in the \code{genome}, which is a \code{\link{tibble}} with columns \samp{Header} and
+#' \samp{Sequence}. The information in the columns Seqid, Start, End and Strand are used to
+#' retrieve the sequences from the \samp{Sequence} column of \code{genome}. Every Seqid in
+#' the \code{gff.table} must match the first token in one of the \samp{Header} texts, in
+#' order to retrieve from the correct \samp{Sequence}. 
 #' 
-#' @return A \code{\link{Fasta}} object with one row for each row in \code{gff.table}. 
+#' @return A fasta object with one row for each row in \code{gff.table}. 
 #' The \code{Header} for each sequence is a summary of the information in the
 #' corresponding row of \code{gff.table}.
 #' 
@@ -21,89 +23,38 @@
 #' 
 #' @examples
 #' # Using two files in this package
-#' xpth <- file.path(path.package("microseq"),"extdata")
-#' gff.file <- file.path(xpth,"small.gff")
-#' genome.file <- file.path(xpth,"small_genome.fasta")
+#' gff.file <- file.path(path.package("microseq"),"extdata","small.gff")
+#' genome.file <- file.path(path.package("microseq"),"extdata","small.fna")
 #' 
-#' # Reading
-#' gff.table <- readGFF(gff.file)
+#' # Reading the genome first
 #' genome <- readFasta(genome.file)
 #' 
 #' # Retrieving sequences
-#' fasta.obj <- gff2fasta(gff.table,genome)
-#' summary(fasta.obj)
-#' plot(fasta.obj)
+#' gff.table <- readGFF(gff.file)
+#' fa.tbl <- gff2fasta(gff.table, genome)
+#' 
+#' # Alternative, using piping
+#' readGFF(gff.file) %>% gff2fasta(genome) -> fa.tbl
 #' 
 #' @useDynLib microseq
 #' @importFrom Rcpp evalCpp
+#' @importFrom dplyr mutate rename right_join select if_else %>% 
+#' @importFrom stringr word str_sub str_c
+#' @importFrom rlang .data
 #' 
 #' @export gff2fasta
 #' 
 gff2fasta <- function(gff.table, genome){
-  utag <- unique(gff.table$Seqid)
-  tagz <- unique(sapply(strsplit(genome$Header, split = " "), function(x){x[1]}))
-  if(sum(is.na(match(utag,tagz))) > 0)
-    stop( "Seqid's in the gff.table do not match the genome$Header" )
-  
-  n <- nrow(gff.table)
-  fobj <- data.frame(Header=gffSignature(gff.table), 
-                     Sequence=rep("", n),
-                     stringsAsFactors = F)
-  strnd <- rep(1, n)
-  strnd[gff.table$Strand == "-"] <- -1
-  gff.table$Strand <- strnd
-  for(i in 1:length(tagz)){
-    idx <- which(gff.table$Seqid == tagz[i])
-    seq <- extractSeq(genome$Sequence[i], 
-                      gff.table$Start[idx], 
-                      gff.table$End[idx], 
-                      gff.table$Strand[idx])
-    idd <- which(gff.table$Strand[idx] < 0)
-    seq[idd] <- reverseComplement(seq[idd])
-    fobj$Sequence[idx] <- seq
-  }
-  class(fobj) <- c("Fasta", "data.frame")
-  return(fobj)
+  genome %>% 
+    mutate(Header = word(.data$Header, 1, 1)) %>% 
+    rename(Seqid = .data$Header, Gseq = .data$Sequence) %>% 
+    right_join(gff.table, by = "Seqid") %>% 
+    mutate(Sequence = str_sub(.data$Gseq, .data$Start, .data$End)) %>% 
+    mutate(Sequence = if_else(.data$Strand == "+", .data$Sequence, reverseComplement(.data$Sequence))) %>% 
+    mutate(Header = str_c("Seqid=", .data$Seqid, ";Start=", .data$Start, ";End=", .data$End, ";Strand=", .data$Strand)) %>% 
+    select(.data$Header, .data$Sequence) %>% 
+    return()
 }
-
-
-
-#' @name gffSignature
-#' @title GFF signature text
-#' 
-#' @description Making a signature text from \code{gff.table} data.
-#' 
-#' @param gff.table A \code{gff.table} (\code{data.frame}) with genomic features information.
-#' 
-#' @details For each row in \code{gff.table} a text is created by pasting these
-#' data together, adding some explanatory text. This function is used by \code{link{gff2fasta}}
-#' to create the Header-lines for the \code{\link{Fasta}} object when retrieving the sequences.
-#' 
-#' @return A vector of texts, one for each row in \code{gff.table}.
-#' 
-#' @author Lars Snipen.
-#' 
-#' @seealso \code{\link{findOrfs}}, \code{\link{gff2fasta}}.
-#' 
-#' @examples # See the example in the Help-file for readGFF.
-#' 
-#' @useDynLib microseq
-#' 
-#' @export gffSignature
-#' 
-gffSignature <- function(gff.table){
-  desc <- paste0("Seqid=", gff.table$Seqid,
-                 ";Source=", gff.table$Source,
-                 ";Type=", gff.table$Type,
-                 ";Start=", gff.table$Start,
-                 ";End=", gff.table$End,
-                 ";Score=", gff.table$Score,
-                 ";Strand=", gff.table$Strand,
-                 ";Phase=", gff.table$Phase,
-                 ";Attributes=", gff.table$Attributes)
-  return(desc)
-}
-
 
 
 
@@ -114,13 +65,13 @@ gffSignature <- function(gff.table){
 #' @description Reading or writing a GFF-table from/to file.
 #' 
 #' @usage readGFF(in.file)
-#' writeGFF(gff.tbl, out.file)
+#' writeGFF(gff.table, out.file)
 #' 
 #' @param in.file Name of file with a GFF-table.
-#' @param gff.tbl A table (\code{data.frame} or \code{tibble}) with genomic features information.
+#' @param gff.table A table (\code{tibble}) with genomic features information.
 #' @param out.file Name of file.
 #' 
-#' @details A GFF-table is simply a \code{\link{data.frame}} or \code{\link{tibble}} with columns
+#' @details A GFF-table is simply a \code{\link{tibble}} with columns
 #' adhering to the format specified by the GFF3 format, see
 #' https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md for details. There is
 #' one row for each feature.
@@ -144,9 +95,9 @@ gffSignature <- function(gff.table){
 #' numerical columns Start, End, Score and Phase. Here \code{NA} is used, but this is replaced by
 #' \code{"."} when writing to file.
 #' 
-#' The \code{readGFF} function will also read files where sequences in FASTA format are added after the GFF-table.
-#' This file section must always start with the line \code{##FASTA}. This \code{\link{Fasta}} object is added to
-#' the GFF-table as an attribute (use \code{attr(gff.tbl, "Fasta")} to retrieve it).
+#' The \code{readGFF} function will also read files where sequences in FASTA format are added after
+#' the GFF-table. This file section must always start with the line \code{##FASTA}. This fasta object
+#' is added to the GFF-table as an attribute (use \code{attr(gff.tbl, "FASTA")} to retrieve it).
 #' 
 #' @return \code{readGFF} returns a \code{gff.table} with the columns described above.
 #' 
@@ -158,15 +109,14 @@ gffSignature <- function(gff.table){
 #' 
 #' @examples
 #' # Using a GFF file in this package
-#' xpth <- file.path(path.package("microseq"),"extdata")
-#' gff.file <- file.path(xpth,"small.gff")
+#' gff.file <- file.path(path.package("microseq"),"extdata","small.gff")
 #' 
-#' # Reading gff-file and print signature
+#' # Reading gff-file
 #' gff.tbl <- readGFF(gff.file)
-#' print(gffSignature(gff.tbl))
 #' 
 #' @importFrom stringr str_split str_c
 #' @importFrom tibble tibble as_tibble
+#' @importFrom dplyr mutate_at %>% 
 #' 
 #' @export readGFF writeGFF
 #' 
@@ -175,57 +125,48 @@ readGFF <- function(in.file){
   lines <- readLines(fil)
   close(fil)
   fasta.idx <- grep("##FASTA", lines)
+  cn <- c("Seqid", "Source", "Type", "Start", "End", "Score", "Strand", "Phase", "Attributes")
   if(length(lines) > 1){
     if(length(fasta.idx) > 0){
       lns1 <- lines[1:fasta.idx]
-      tbl <- as_tibble(str_split(lns1[!grepl("^#", lns1)], pattern = "\t", simplify = T))
-      if(ncol(tbl) != 9 ) stop("Table must have 9 tab-separated columns, this one has", ncol(tbl))
-      colnames(tbl) <- c("Seqid", "Source", "Type", "Start", "End", "Score", "Strand", "Phase", "Attributes")
-      w <- options()$warn
-      options(warn = -1)
-      tbl$Start <- as.numeric(tbl$Start)
-      tbl$End   <- as.numeric(tbl$End)
-      tbl$Score <- as.numeric(tbl$Score)
-      tbl$Phase <- as.numeric(tbl$Phase)
-      options(warn = w)
-      
+      gff.table <- as_tibble(str_split(lns1[!grepl("^#", lns1)], pattern = "\t", simplify = T))
+      if(ncol(gff.table) != 9 ) stop("Table must have 9 tab-separated columns, this one has", ncol(gff.table))
+      colnames(gff.table) <- c("Seqid", "Source", "Type", "Start", "End", "Score", "Strand", "Phase", "Attributes")
+      gff.table %>% 
+        mutate_at(c("Start", "End", "Score", "Phase"), as.numeric) -> gff.table
       lns2 <- lines[(fasta.idx+1):length(lines)]
       idx <- c(grep("^>", lns2), length(lns2) + 1)
       fsa <- tibble(Header = gsub("^>", "", lns2[idx[1:(length(idx)-1)]]),
                     Sequence = sapply(1:(length(idx)-1), function(ii){
                       str_c(lns2[(idx[ii]+1):(idx[ii+1]-1)], collapse = "")
                     }))
-      attr(tbl, "Fasta") <- fsa
+      attr(gff.table, "FASTA") <- fsa
     } else {
-      tbl <- as_tibble(str_split(lines[!grepl("^#", lines)], pattern = "\t", simplify = T))
-      if(ncol(tbl) != 9 ) stop("Table must have 9 tab-separated columns, this one has", ncol(tbl))
-      colnames(tbl) <- c("Seqid", "Source", "Type", "Start", "End", "Score", "Strand", "Phase", "Attributes")
-      w <- options()$warn
-      options(warn = -1)
-      tbl$Start <- as.numeric(tbl$Start)
-      tbl$End   <- as.numeric(tbl$End)
-      tbl$Score <- as.numeric(tbl$Score)
-      tbl$Phase <- as.numeric(tbl$Phase)
-      options(warn = w)
+      gff.table <- as_tibble(str_split(lines[!grepl("^#", lines)], pattern = "\t", simplify = T))
+      if(ncol(gff.table) != 9 ) stop("Table must have 9 tab-separated columns, this one has", ncol(gff.table))
+      colnames(gff.table) <- cn
+      gff.table %>% 
+        mutate_at(c("Start", "End", "Score", "Phase"), as.numeric) -> gff.table
     }
   } else {
-    tbl <- tibble("Seqid" = NULL,
-                  "Source" = NULL,
-                  "Type" = NULL,
-                  "Start" = NULL,
-                  "End" = NULL,
-                  "Score" = NULL,
-                  "Strand" = NULL,
-                  "Phase" = NULL,
-                  "Attributes" = NULL)
+    gff.table <- tibble("Seqid" = character(0),
+                        "Source" = character(0),
+                        "Type" = character(0),
+                        "Start" = numeric(0),
+                        "End" = numeric(0),
+                        "Score" = numeric(0),
+                        "Strand" = character(0),
+                        "Phase" = numeric(0),
+                        "Attributes" = character(0))
   }
-  return(tbl)
+  return(gff.table)
 }
-writeGFF <- function(gff.tbl, out.file){
+writeGFF <- function(gff.table, out.file){
   line1 <- c("##gff-version 3")
-  lines <- sapply(1:nrow(gff.tbl), function(i){paste(gff.tbl[i,], collapse = "\t")})
-  lines <- gsub("\tNA\t", "\t.\t", lines)
-  lines <- gsub("\tNA$", "\t.", lines)
+  sapply(1:nrow(gff.table), function(i){str_c(gff.table[i,], collapse = "\t")}) %>% 
+    str_replace_all("\tNA\t", "\t.\t") %>% 
+    str_replace_all("\tNA$", "\t.") -> lines
+  out.file <- normalizePath(out.file)
   writeLines(c(line1, lines), con = out.file)
-  return(paste("gff.table written to", out.file))
+  return(NULL)
 }

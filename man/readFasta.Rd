@@ -3,7 +3,6 @@
 \name{readFasta}
 \alias{readFasta}
 \alias{writeFasta}
-\alias{Fasta}
 \title{Read and write FASTA files}
 \usage{
 readFasta(in.file)
@@ -12,15 +11,15 @@ writeFasta(fdta, out.file, width = 80)
 \arguments{
 \item{in.file}{url/directory/name of FASTA file to read.}
 
-\item{fdta}{A \samp{Fasta} object, see \sQuote{Details} below.}
+\item{fdta}{A \code{\link{tibble}} with sequence data, see \sQuote{Details} below.}
 
-\item{out.file}{Name of FASTA-file to create.}
+\item{out.file}{Name of FASTA file to create.}
 
-\item{width}{Number of sequence characters per line.}
+\item{width}{Number of characters per line, or 0 for no linebreaks.}
 }
 \value{
-\code{\link{readFasta}} returns a \code{Fasta} object with the contents of the FASTA file. This is an
-extension to a \code{data.frame} and contains two columns of text. The first, named \samp{Header}, contains
+\code{\link{readFasta}} returns a \code{\link{tibble}} with the contents of the FASTA
+file stored in two columns of text. The first, named \samp{Header}, contains
 the headerlines and the second, named \samp{Sequence}, contains the sequences.
 
 \code{\link{writeFasta}} produces a FASTA file.
@@ -32,31 +31,34 @@ Reads and writes biological sequences (DNA, RNA, protein) in the FASTA format.
 These functions handle input/output of sequences in the commonly used FASTA format.
 For every sequence it is presumed there is one Header-line starting with a \sQuote{>}.
 
-The sequences are stored in a \code{Fasta} object. This is an extension of a \code{data.frame}
-containing two text-columns named \samp{Header} and \samp{Sequence}. If other columns are
-present, these will be ignored by \code{\link{writeFasta}}.
+The sequences are stored in a \code{\link{tibble}}, opening up all the possibilities in R for
+fast and easy manipulations. The content of the file is stored as two columns, \samp{Header}
+and \samp{Sequence}. If other columns are added, these will be ignored by \code{\link{writeFasta}}.
 
-The \code{Fasta} object can be treated as a \code{data.frame}, but the generic functions \code{\link{plot.Fasta}}
-and \code{\link{summary.Fasta}} are defined. The \code{data.frame} property makes it
-straightforward to manipulate all headers or all sequences, or to extract or delete entries (rows), or to merge
-several data sets using \code{\link{rbind}}.
+Setting \code{width = 0} in \code{\link{writeFasta}} results in no linebreaks in the sequences
+(one sequence per line).
 }
 \examples{
 \dontrun{
 # We need a FASTA-file to read, here is one example file:
-ex.file <- file.path(file.path(path.package("microseq"),"extdata"),"small.fasta")
-# Reading a file with name in ex.file
-fdta <- readFasta(ex.file)
-summary(fdta)
+fa.file <- file.path(file.path(path.package("microseq"),"extdata"),"small.ffn")
+
+# Read and write
+fdta <- readFasta(fa.file)
+ok <- writeFasta(fdta[4:5,], out.file = "delete_me.fasta")
+
+# Make use of dplyr to copy parts of the file to another file
+readFasta(fa.file) \%>\% 
+  filter(str_detect(Sequence, "TGA$")) \%>\% 
+  writeFasta(out.file = "TGAstop.fasta", width = 0) -> ok
 }
 
 }
 \seealso{
-\code{\link{plot.Fasta}}, \code{\link{summary.Fasta}}, \code{\link{readFastq}}.
+\code{\link{readFastq}}.
 }
 \author{
 Lars Snipen and Kristian Hovde Liland.
 }
 \keyword{FASTA}
-\keyword{Fasta}
 \keyword{sequence}
