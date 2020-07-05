@@ -1,11 +1,11 @@
-2dda9eb91fa593d51d49959fd7b91607 *DESCRIPTION
+cc303a38e3110b6197217cb970abf58e *DESCRIPTION
 3cb073d9ab52dd8e27f8e2e04dd37fdf *NAMESPACE
 cd5c173f0f0905c4b0bb4c3c576cc718 *R/RcppExports.R
 215eba877cbe44185ce2b2d3037e846f *R/dnaManipulate.R
 5ed012880c0c60c5a533bbee55f76135 *R/external.R
-88edcc696d3ee01c386aabbef16ee909 *R/fasta.R
+cc3fdf510cc322ccf9824ac560b5e6f8 *R/fasta.R
 1febc5b252c8b746c492665226452bdd *R/fastq.R
-b05fdce2b2e54eb505ea1f3e244695b3 *R/gff.R
+1f34e234a604850b9a863e7c3b7a3d76 *R/gff.R
 45b31d1b54070e4ac3ef5049bd064b4f *R/microseq-package.R
 539a24abbcf3c7052766730243e95303 *R/multialign.R
 a393eb33c56766186d682c5c01c1e1fc *R/orfs.R
@@ -13,7 +13,7 @@ e1d9deda67d179f7d0b41536599c4c1c *R/utilityfun.R
 43bf0a975dfe051c7407d720b09ec5d3 *build/vignette.rds
 b2ef10b9ecdbfaf8d2e39fb65deb777f *inst/doc/vignette.R
 413c5dbd2f2539553d3d159442566646 *inst/doc/vignette.Rnw
-48ad76d015fed536b04a9c31e06a8fba *inst/doc/vignette.pdf
+731bb033fd96554b49d9ccd015a79119 *inst/doc/vignette.pdf
 af1e142fcd921434271b775104402eba *inst/extdata/16S.fasta
 f67702a09be65b9703a89f10309b951e *inst/extdata/small.faa
 de6f80cfe8dbbdf1728facd546bc8c5b *inst/extdata/small.fastq.gz
