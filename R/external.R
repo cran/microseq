@@ -55,7 +55,7 @@ muscle <- function(in.file, out.file, quiet = FALSE, diags = FALSE, maxiters = 1
 #' 
 #' @description Finding rRNA genes in genomic DNA using the barrnap software.
 #' 
-#' @param genome.file A FASTA file with the genome sequence(s).
+#' @param genome A table with columns Header and Sequence, containing the genome sequence(s)..
 #' @param bacteria Logical, the genome is either a bacteria (default) or an archea.
 #' @param cpu Number of CPUs to use, default is 1.
 #' 
@@ -79,23 +79,26 @@ muscle <- function(in.file, out.file, quiet = FALSE, diags = FALSE, maxiters = 1
 #' genome.file <- file.path(path.package("microseq"),"extdata","small.fna")
 #' 
 #' # Searching for rRNA sequences, and inspecting
-#' gff.tbl <- findrRNA(genome.file)
+#' genome <- readFasta(genome.file)
+#' gff.tbl <- findrRNA(genome)
 #' print(gff.table)
 #' 
 #' # Retrieving the sequences
-#' genome <- readFasta(genome.file)
 #' rRNA <- gff2fasta(gff.tbl, genome)
 #' }
 #' 
 #' @export findrRNA
 #' 
-findrRNA <- function(genome.file, bacteria = TRUE, cpu = 1){
+findrRNA <- function(genome, bacteria = TRUE, cpu = 1){
   if(available.external("barrnap")){
+    if(sum(c("Header", "Sequence") %in% colnames(genome)) != 2) stop("First argument must be table with columns Header and Sequence")
+    if(nrow(genome) == 0) stop("Genome is empty (no sequences)")
     kingdom <- ifelse(bacteria, "bac", "arc")
-    tmp.file <- tempfile(pattern = "barrnap", fileext = ".gff")
-    system(paste("barrnap --quiet --kingdom", kingdom, genome.file, ">", tmp.file))
-    gff.table <- readGFF(tmp.file)
-    ok <- file.remove(tmp.file)
+    tmp.gff <- tempfile(pattern = "barrnap", fileext = ".gff")
+    tmp.fna <- tempfile(pattern = "genome", fileext = ".fna")
+    system(paste("barrnap --quiet --kingdom", kingdom, tmp.fna, ">", tmp.gff))
+    gff.table <- readGFF(tmp.gff)
+    ok <- file.remove(tmp.fna, tmp.gff)
     return(gff.table)
   }
 }
@@ -107,7 +110,7 @@ findrRNA <- function(genome.file, bacteria = TRUE, cpu = 1){
 #' 
 #' @description Finding coding genes in genomic DNA using the Prodigal software.
 #' 
-#' @param genome.file A FASTA file with the genome sequence(s).
+#' @param genome A table with columns Header and Sequence, containing the genome sequence(s).
 #' @param faa.file If provided, prodigal will output all proteins to this fasta-file (text).
 #' @param ffn.file If provided, prodigal will output all DNA sequences to this fasta-file (text).
 #' @param proc Either \code{"single"} or \code{"meta"}, see below.
@@ -122,7 +125,7 @@ findrRNA <- function(genome.file, bacteria = TRUE, cpu = 1){
 #' be produced directly by providing filenames in \code{faa.file} and \code{ffn.file}.
 #' 
 #' The input \code{proc} allows you to specify if the input data should be treated as a single genome
-#' (default) or as a metagenome.
+#' (default) or as a metagenome. In the latter case the \code{genome} are (un-binned) contigs.
 #' 
 #' The translation table is by default 11 (the standard code), but table 4 should be used for Mycoplasma etc.
 #' 
@@ -146,23 +149,35 @@ findrRNA <- function(genome.file, bacteria = TRUE, cpu = 1){
 #' genome.file <- file.path(path.package("microseq"),"extdata","small.fna")
 #' 
 #' # Searching for coding sequences, this is Mycoplasma (trans.tab = 4)
-#' gff.tbl <- findGenes(genome.file, trans.tab = 4)
+#' genome <- readFasta(genome.file)
+#' gff.tbl <- findGenes(genome, trans.tab = 4)
 #' 
 #' # Retrieving the sequences
-#' genome <- readFasta(genome.file)
 #' cds.tbl <- gff2fasta(gff.tbl, genome)
+#' 
+#' # You may use the pipe operator
+#' library(ggplot2)
+#' readFasta(genome.file) %>% 
+#'   findGenes(trans.tab = 4) %>% 
+#'   filter(Score >= 50) %>% 
+#'   ggplot() +
+#'   geom_histogram(aes(x = Score), bins = 25)
 #' }
 #' 
 #' @export findGenes
 #' 
-findGenes <- function(genome.file, faa.file = "", ffn.file = "", proc = "single",
+findGenes <- function(genome, faa.file = "", ffn.file = "", proc = "single",
                       trans.tab = 11, mask.N = FALSE, bypass.SD = FALSE){
   if(available.external("prodigal")){
+    if(sum(c("Header", "Sequence") %in% colnames(genome)) != 2) stop("First argument must be table with columns Header and Sequence")
+    if(nrow(genome) == 0) stop("Genome is empty (no sequences)")
     if(nchar(faa.file) > 0) faa.file <- paste("-a", faa.file)
     if(nchar(ffn.file) > 0) ffn.file <- paste("-d", ffn.file)
     mask.N <- ifelse(mask.N, "-m", "")
     bypass.SD <- ifelse(bypass.SD, "-n", "")
-    tmp.file <- tempfile(pattern = "prodigal", fileext = "gff")
+    tmp.fna <- tempfile(pattern = "genome", fileext = "fna")
+    writeFasta(genome, out.file = tmp.fna)
+    tmp.gff <- tempfile(pattern = "prodigal", fileext = "gff")
     command <- paste("prodigal -q -f gff",
                      faa.file,
                      ffn.file,
@@ -170,11 +185,11 @@ findGenes <- function(genome.file, faa.file = "", ffn.file = "", proc = "single"
                      mask.N,
                      bypass.SD,
                      "-g", trans.tab,
-                     "-i", genome.file,
-                     "-o", tmp.file)
+                     "-i", tmp.fna,
+                     "-o", tmp.gff)
     system(command)
-    gff.table <- readGFF(tmp.file)
-    file.remove(tmp.file)
+    gff.table <- readGFF(tmp.gff)
+    file.remove(tmp.fna, tmp.gff)
     return(gff.table)
   }
 }
