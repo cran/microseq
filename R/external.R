@@ -12,7 +12,7 @@
 #' @details The software MUSCLE (Edgar, 2004) must be installed and available on the system. Test this
 #' by typing \code{system("muscle")} in the Console, and some sensible output should be produced.
 #' NOTE: The executable must be named \code{muscle} on your system, no version numbers etc. For more
-#' details on MUSCLE, see \url{http://www.drive5.com/muscle}.
+#' details on MUSCLE, see \url{http://www.drive5.com/muscle/}.
 #' 
 #' By default \code{diags = FALSE} but can be set to \code{TRUE} to increase speed. This should be done
 #' only if sequences are highly similar.
@@ -94,8 +94,9 @@ findrRNA <- function(genome, bacteria = TRUE, cpu = 1){
     if(sum(c("Header", "Sequence") %in% colnames(genome)) != 2) stop("First argument must be table with columns Header and Sequence")
     if(nrow(genome) == 0) stop("Genome is empty (no sequences)")
     kingdom <- ifelse(bacteria, "bac", "arc")
-    tmp.gff <- tempfile(pattern = "barrnap", fileext = ".gff")
     tmp.fna <- tempfile(pattern = "genome", fileext = ".fna")
+    writeFasta(genome, out.file = tmp.fna)
+    tmp.gff <- tempfile(pattern = "barrnap", fileext = ".gff")
     system(paste("barrnap --quiet --kingdom", kingdom, tmp.fna, ">", tmp.gff))
     gff.table <- readGFF(tmp.gff)
     ok <- file.remove(tmp.fna, tmp.gff)
